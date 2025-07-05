@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Stat Gain Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Added chart.js zoom plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .input-label {
+            @apply block text-sm font-medium text-gray-700 mb-1;
+        }
+        .input-field {
+            @apply w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm;
+        }
+        .btn {
+            @apply w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white;
+        }
+        .btn-primary {
+            @apply bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500;
+        }
+        .result-card {
+            @apply bg-white p-6 rounded-lg shadow-md mt-6;
+        }
+        .result-title {
+            @apply text-lg font-semibold text-gray-800 mb-2;
+        }
+        .result-value {
+            @apply text-3xl font-bold text-indigo-600;
+        }
+        .result-label {
+            @apply text-sm text-gray-500;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
+        <div class="bg-white p-8 rounded-2xl shadow-lg">
+            <h1 class="text-3xl font-bold text-gray-900 text-center mb-2">Advanced Stat Gain Calculator</h1>
+            <p class="text-center text-gray-600 mb-8">Model your training sessions and project long-term gains.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Input Form -->
+                <div class="space-y-6">
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">Training Setup</h2>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label for="gym" class="input-label">Gym</label>
+                                <select id="gym" class="input-field"></select>
+                            </div>
+                            <div>
+                                <label for="stat" class="input-label">Stat to Train</label>
+                                <select id="stat" class="input-field"></select>
+                            </div>
+                            <div>
+                                <label for="currentStat" class="input-label">Current Stat</label>
+                                <input type="number" id="currentStat" class="input-field" value="1000">
+                            </div>
+                             <div>
+                                <label for="statMultiplier" class="input-label">Stat Multiplier</label>
+                                <input type="number" id="statMultiplier" class="input-field" value="1.0" step="0.01">
+                            </div>
+                            <div>
+                                <label for="energy" class="input-label">Energy to Train</label>
+                                <input type="number" id="energy" class="input-field" value="1000">
+                            </div>
+                            <div>
+                                <label for="initialHappy" class="input-label">Initial Happy</label>
+                                <input type="number" id="initialHappy" class="input-field" value="5025">
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">Item Usage</h2>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                             <div>
+                                <label for="candyType" class="input-label">Candy Type</label>
+                                <select id="candyType" class="input-field"></select>
+                            </div>
+                            <div>
+                                <label for="candyAmount" class="input-label">Candies Used</label>
+                                <input type="number" id="candyAmount" class="input-field" value="4">
+                            </div>
+                            <div>
+                                <label for="edvdAmount" class="input-label">eDVDs Used</label>
+                                <input type="number" id="edvdAmount" class="input-field" value="2">
+                            </div>
+                            <div class="flex items-end">
+                                <div class="relative flex items-start">
+                                    <div class="flex items-center h-5">
+                                        <input id="useEcstasy" type="checkbox" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded" checked>
+                                    </div>
+                                    <div class="ml-3 text-sm">
+                                        <label for="useEcstasy" class="font-medium text-gray-700">Use Ecstasy?</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                     <button id="calculateBtn" class="btn btn-primary !mt-8">Calculate & Project</button>
+                </div>
+
+                <!-- Results Display -->
+                <div id="results-container" class="hidden">
+                    <div class="result-card">
+                         <h2 class="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">Calculation Results</h2>
+                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                            <div>
+                                <p class="result-value" id="statGain"></p>
+                                <p class="result-label">Expected Gain</p>
+                            </div>
+                            <div>
+                                <p class="result-value" id="finalStat"></p>
+                                <p class="result-label">Predicted Final Stat</p>
+                            </div>
+                             <div>
+                                <p class="result-value" id="errorRange"></p>
+                                <p class="result-label">Possible Error (±)</p>
+                            </div>
+                         </div>
+                    </div>
+                    <div id="warnings-container" class="mt-4 space-y-2"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart -->
+        <div class="bg-white p-8 rounded-2xl shadow-lg mt-8 hidden" id="chart-container">
+            <h2 class="text-2xl font-bold text-gray-900 text-center mb-4">Stat Gain Projection</h2>
+            <!-- Day Range Slider -->
+            <div class="mb-4 max-w-lg mx-auto">
+                <label for="daySlider" class="input-label text-center">Projection Period: <span id="daySliderValue" class="font-bold">90</span> days</label>
+                <input type="range" id="daySlider" min="10" max="365" value="90" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+            </div>
+            <canvas id="projectionChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // --- Data Tables ---
+        const GYM_TABLE = {
+            "Premier Fitness": [5, 2.0, 2.0, 2.0, 2.0], "Average Joes": [5, 2.4, 2.4, 2.8, 2.4],
+            "Woody's Workout": [5, 2.8, 2.4, 2.8, 2.8], "Beach Bods": [5, 3.2, 3.2, 3.2, 3.2],
+            "Silver Gym": [5, 3.4, 3.6, 3.4, 3.2], "Pour Femme": [5, 3.4, 3.6, 3.6, 3.8],
+            "Davies Den": [5, 3.7, -1, 3.7, 3.7], "Global Gym": [10, 4.0, 4.0, 4.0, 4.0],
+            "Knuckle Heads": [10, 4.8, 4.4, 4.0, 4.2], "Pioneer Fitness": [10, 4.4, 4.6, 4.8, 4.4],
+            "Anabolic Anomalie": [10, 5.0, 4.6, 5.2, 4.6], "Core": [10, 5.0, 5.2, 5.0, 5.2],
+            "Racing Fitness": [10, 5.0, 5.4, 4.8, 5.2], "Complete Cardio": [10, 5.5, -1, 5.5, 5.2],
+            "Legs, Bums and Tums": [10, -1, 5.6, 5.6, 5.8], "Deep Burn": [10, 6.0, 6.0, 6.0, 6.0],
+            "Apollo Gym": [10, 6.0, 6.2, 6.4, 6.2], "Gun Shop": [10, 6.6, -1, 6.2, -1],
+            "Force Training": [10, 6.4, 6.6, -1, 6.8], "Cha Cha's": [10, 6.8, 6.4, 6.8, 7.0],
+            "Atlas": [10, 7.0, 6.4, 6.4, 6.6], "Last Round": [10, 6.8, 6.6, 7.0, 6.6],
+            "The Edge": [10, 6.8, 7.0, 7.0, 6.8], "George's": [10, 7.3, -1, 7.3, 7.3],
+            "Balboas Gym": [25, -1, -1, 7.5, 7.5], "Frontline Fitness": [25, 7.5, 7.5, -1, -1],
+            "Gym 3000": [50, 8.0, -1, -1, -1], "Mr. Isoyamas": [50, -1, -1, 8.0, -1],
+            "Total Rebound": [50, -1, 8.0, -1, -1], "Elites": [50, -1, -1, -1, 8.0],
+            "Sports Science Lab": [25, 9.0, 9.0, 9.0, 9.0], "The Jail Gym": [5, 3.4, 3.4, 4.6, -1],
+        };
+        const STAT_TABLE = {
+            "strength": [1600, 1700, 700], "speed": [1600, 2000, 1350],
+            "dexterity": [1800, 1500, 1000], "defense": [2100, -600, 1500],
+        };
+        const HAPPY_ITEMS = {
+            "Candy (+25)": [25, 30], "Candy (+35)": [35, 30], "Candy (+50)": [50, 30],
+            "Candy (+70)": [70, 30], "Candy (+100)": [100, 30], "eDVD": [2500, 360],
+        };
+        const STAT_COLUMN_MAP = {"strength": 1, "speed": 2, "defense": 3, "dexterity": 4};
+        const MAX_HAPPY_COOLDOWN_MINUTES = 24 * 60 + 1;
+        const ECSTASY_COOLDOWN_MINUTES = 4 * 60;
+        const XANAX_COOLDOWN_MINUTES = 7 * 60;
+        const NATURAL_ENERGY_REGEN_PERIOD_MINUTES = 10;
+        const NATURAL_ENERGY_REGEN_AMOUNT = 5;
+
+        // --- Core Calculation Logic ---
+        function calculate_final_stat(total_energy_to_spend, gym_name, stat_to_train, current_stat, initial_happy, statMultiplier, candies_used = null, edvds_used = 0, use_ecstasy = false) {
+            if (candies_used === null) candies_used = {};
+            let total_happy_gain = 0, total_happy_cooldown = 0;
+            for (const [candy_name, count] of Object.entries(candies_used)) {
+                if (HAPPY_ITEMS[candy_name]) {
+                    total_happy_gain += HAPPY_ITEMS[candy_name][0] * count;
+                    total_happy_cooldown += HAPPY_ITEMS[candy_name][1] * count;
+                }
+            }
+            if (edvds_used > 0) {
+                total_happy_gain += HAPPY_ITEMS["eDVD"][0] * edvds_used;
+                total_happy_cooldown += HAPPY_ITEMS["eDVD"][1] * edvds_used;
+            }
+            const happy_after_items = initial_happy + total_happy_gain;
+            let ecstasy_cooldown = 0, starting_happy;
+            if (use_ecstasy) {
+                starting_happy = happy_after_items * 2;
+                ecstasy_cooldown = ECSTASY_COOLDOWN_MINUTES;
+            } else {
+                starting_happy = happy_after_items;
+            }
+            let cooldown_warning = total_happy_cooldown > MAX_HAPPY_COOLDOWN_MINUTES ? `Warning: Total happy item cooldown of ${total_happy_cooldown} minutes exceeds the ${MAX_HAPPY_COOLDOWN_MINUTES}-minute cap.` : null;
+            let strategy_warning = null;
+            if (total_energy_to_spend >= 1000) {
+                const xanax_energy = 4 * 250;
+                const total_xanax_cooldown = 4 * XANAX_COOLDOWN_MINUTES;
+                const natural_energy_gain = (total_xanax_cooldown / NATURAL_ENERGY_REGEN_PERIOD_MINUTES) * NATURAL_ENERGY_REGEN_AMOUNT;
+                const alternative_total_energy = xanax_energy + natural_energy_gain;
+                strategy_warning = `Strategic Warning: Training with ${total_energy_to_spend} energy at once is inefficient. Consider the 'Xanax' strategy: Taking 4 Xanax over ~${(total_xanax_cooldown / 60).toFixed(1)} hours would yield ${xanax_energy} energy plus ~${natural_energy_gain.toFixed(0)} naturally regenerated energy, for a total of ~${alternative_total_energy.toFixed(0)} energy to train with.`;
+            }
+            stat_to_train = stat_to_train.toLowerCase();
+            if (!GYM_TABLE[gym_name]) return { error: `Gym '${gym_name}' not found.` };
+            if (!STAT_TABLE[stat_to_train]) return { error: `Stat '${stat_to_train}' not found.` };
+            const energy_per_train = GYM_TABLE[gym_name][0];
+            const gym_dots = GYM_TABLE[gym_name][STAT_COLUMN_MAP[stat_to_train]];
+            if (gym_dots <= 0) return { error: `Gym '${gym_name}' does not train '${stat_to_train}'.` };
+            const [stat_val1, stat_val2, stat_val3] = STAT_TABLE[stat_to_train];
+            if (energy_per_train === 0) return { error: "Energy per train cannot be zero." };
+            const num_trains = Math.floor(total_energy_to_spend / energy_per_train);
+            if (num_trains <= 0) return { error: "Not enough energy for a single train." };
+
+            const calculate_lowest_gain = (base_stat, happy) => {
+                const happy_factor = Math.round((1 + 0.07 * Math.round(Math.log(1 + happy / 250) * 10000) / 10000) * 10000) / 10000;
+                const term1 = base_stat * happy_factor;
+                const term2 = 8 * Math.pow(happy, 1.05);
+                const term3 = stat_val1 * (1 - Math.pow(happy / 99999, 2));
+                const term4 = stat_val2;
+                const inner_sum = term1 + term2 + term3 + term4 - stat_val3;
+                const constant = 1 / 200000;
+                return constant * gym_dots * energy_per_train * statMultiplier * inner_sum;
+            };
+            const calculate_highest_gain = (base_stat, happy) => {
+                const happy_factor = Math.round((1 + 0.07 * Math.round(Math.log(1 + happy / 250) * 10000) / 10000) * 10000) / 10000;
+                const term1 = base_stat * happy_factor;
+                const term2 = 8 * Math.pow(happy, 1.05);
+                const term3 = stat_val1 * (1 - Math.pow(happy / 99999, 2));
+                const term4 = stat_val2;
+                const inner_sum = term1 + term2 + term3 + term4 + stat_val3;
+                const constant = 1 / 200000;
+                return constant * gym_dots * energy_per_train * statMultiplier * inner_sum;
+            };
+
+            let lowest_path_stat = current_stat, highest_path_stat = current_stat;
+            let lowest_path_happy = starting_happy, highest_path_happy = starting_happy;
+            for (let i = 0; i < num_trains; i++) {
+                const low_gain = calculate_lowest_gain(lowest_path_stat, lowest_path_happy);
+                const high_gain = calculate_highest_gain(highest_path_stat, highest_path_happy);
+                lowest_path_stat += low_gain;
+                highest_path_stat += high_gain;
+                lowest_path_happy = Math.max(0, lowest_path_happy - 0.6 * energy_per_train);
+                highest_path_happy = Math.max(0, highest_path_happy - 0.4 * energy_per_train);
+            }
+            const n3 = lowest_path_stat - current_stat;
+            const o3 = highest_path_stat - current_stat;
+            const p3 = (n3 + o3) / 2;
+            const c12_error_range = (o3 - n3) / 2;
+            const m3_low_gain = calculate_lowest_gain(current_stat, starting_happy);
+            const m3_high_gain = calculate_highest_gain(current_stat, starting_happy);
+            const final_result = num_trains > 1 ? p3 : (m3_low_gain + m3_high_gain) / 2;
+
+            return {
+                final_expected_gain_b12: final_result,
+                possible_error_c12: c12_error_range,
+                cooldown_warning: cooldown_warning,
+                strategy_warning: strategy_warning,
+                ecstasy_cooldown_minutes: ecstasy_cooldown,
+                total_gain_range_n3_o3: [n3, o3],
+                final_lowest_stat: lowest_path_stat,
+            };
+        }
+
+        // --- UI and Chart Logic ---
+        const gymSelect = document.getElementById('gym');
+        const statSelect = document.getElementById('stat');
+        const candySelect = document.getElementById('candyType');
+        const calculateBtn = document.getElementById('calculateBtn');
+        const daySlider = document.getElementById('daySlider');
+        const daySliderValue = document.getElementById('daySliderValue');
+        let projectionChart = null;
+        let chartParams = {}; // Store params for slider updates
+
+        function populateSelects() {
+            Object.keys(GYM_TABLE).forEach(gym => {
+                const option = document.createElement('option');
+                option.value = gym;
+                option.textContent = gym;
+                gymSelect.appendChild(option);
+            });
+            gymSelect.value = "Woody's Workout";
+
+            Object.keys(STAT_TABLE).forEach(stat => {
+                const option = document.createElement('option');
+                option.value = stat;
+                option.textContent = stat.charAt(0).toUpperCase() + stat.slice(1);
+                statSelect.appendChild(option);
+            });
+
+            Object.keys(HAPPY_ITEMS).filter(item => item.startsWith("Candy")).forEach(candy => {
+                const option = document.createElement('option');
+                option.value = candy;
+                option.textContent = candy;
+                candySelect.appendChild(option);
+            });
+            candySelect.value = "Candy (+100)";
+        }
+
+        function projectGains(days, startStat, strategyParams) {
+            let dailyStats = [startStat];
+            let currentStat = startStat;
+            for (let i = 0; i < days; i++) {
+                const result = calculate_final_stat(
+                    strategyParams.energy,
+                    strategyParams.gym,
+                    strategyParams.stat,
+                    currentStat,
+                    strategyParams.happy,
+                    strategyParams.multiplier,
+                    strategyParams.candies,
+                    strategyParams.edvds,
+                    strategyParams.ecstasy
+                );
+                if (result.error) {
+                    console.error("Projection error:", result.error);
+                    break;
+                }
+                currentStat = result.final_lowest_stat;
+                dailyStats.push(currentStat);
+            }
+            return dailyStats;
+        }
+
+        function updateChart(days, startStat, happyJumpParams, xanaxParams) {
+            const chartContainer = document.getElementById('chart-container');
+            chartContainer.classList.remove('hidden');
+            const ctx = document.getElementById('projectionChart').getContext('2d');
+            
+            const labels = Array.from({ length: days + 1 }, (_, i) => `Day ${i}`);
+            
+            const happyJumpData = projectGains(days, startStat, happyJumpParams);
+            const xanaxData = projectGains(days, startStat, xanaxParams);
+
+            if (projectionChart) {
+                projectionChart.destroy();
+            }
+
+            projectionChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Happy Jump Strategy',
+                            data: happyJumpData,
+                            borderColor: 'rgb(79, 70, 229)',
+                            backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                            tension: 0.1,
+                            fill: true,
+                        },
+                        {
+                            label: 'Xanax Train Strategy',
+                            data: xanaxData,
+                            borderColor: 'rgb(220, 38, 38)',
+                            backgroundColor: 'rgba(220, 38, 38, 0.1)',
+                            tension: 0.1,
+                            fill: true,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y.toLocaleString(undefined, {maximumFractionDigits: 0});
+                                    }
+                                    return label;
+                                }
+                            }
+                        },
+                        // Zoom plugin configuration
+                        zoom: {
+                            pan: {
+                                enabled: true,
+                                mode: 'xy',
+                            },
+                            zoom: {
+                                wheel: {
+                                    enabled: true,
+                                },
+                                pinch: {
+                                    enabled: true
+                                },
+                                mode: 'xy',
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            title: { display: true, text: 'Total Stat' },
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        calculateBtn.addEventListener('click', () => {
+            // Get all inputs
+            const gym = gymSelect.value;
+            const stat = statSelect.value;
+            const currentStat = parseFloat(document.getElementById('currentStat').value);
+            const statMultiplier = parseFloat(document.getElementById('statMultiplier').value);
+            const energy = parseFloat(document.getElementById('energy').value);
+            const initialHappy = parseFloat(document.getElementById('initialHappy').value);
+            const candyType = candySelect.value;
+            const candyAmount = parseInt(document.getElementById('candyAmount').value);
+            const edvdAmount = parseInt(document.getElementById('edvdAmount').value);
+            const useEcstasy = document.getElementById('useEcstasy').checked;
+
+            const candies_used = {};
+            if (candyAmount > 0) {
+                candies_used[candyType] = candyAmount;
+            }
+
+            // Run main calculation
+            const result = calculate_final_stat(energy, gym, stat, currentStat, initialHappy, statMultiplier, candies_used, edvdAmount, useEcstasy);
+            
+            // Display results
+            const resultsContainer = document.getElementById('results-container');
+            const warningsContainer = document.getElementById('warnings-container');
+            resultsContainer.classList.remove('hidden');
+            warningsContainer.innerHTML = '';
+
+            if (result.error) {
+                document.getElementById('statGain').textContent = 'Error';
+                document.getElementById('finalStat').textContent = 'Error';
+                document.getElementById('errorRange').textContent = 'N/A';
+                warningsContainer.innerHTML = `<div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert"><p class="font-bold">Error</p><p>${result.error}</p></div>`;
+                return;
+            }
+
+            const gain = result.final_expected_gain_b12;
+            const finalStat = currentStat + gain;
+
+            document.getElementById('statGain').textContent = gain.toLocaleString(undefined, {maximumFractionDigits: 2});
+            document.getElementById('finalStat').textContent = finalStat.toLocaleString(undefined, {maximumFractionDigits: 2});
+            document.getElementById('errorRange').textContent = `± ${result.possible_error_c12.toLocaleString(undefined, {maximumFractionDigits: 2})}`;
+            
+            if(result.cooldown_warning) {
+                warningsContainer.innerHTML += `<div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4" role="alert"><p class="font-bold">Cooldown Warning</p><p>${result.cooldown_warning}</p></div>`;
+            }
+            if(result.strategy_warning) {
+                warningsContainer.innerHTML += `<div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4" role="alert"><p class="font-bold">Strategy Note</p><p>${result.strategy_warning}</p></div>`;
+            }
+
+            // --- Store params and Update Chart ---
+            chartParams.startStat = currentStat;
+            chartParams.happyJumpParams = {
+                energy: energy, gym: gym, stat: stat, happy: initialHappy,
+                multiplier: statMultiplier, candies: candies_used, edvds: edvdAmount, ecstasy: useEcstasy
+            };
+            chartParams.xanaxParams = {
+                energy: 1840, gym: gym, stat: stat, happy: initialHappy,
+                multiplier: statMultiplier, candies: {}, edvds: 0, ecstasy: false
+            };
+            
+            const days = parseInt(daySlider.value);
+            updateChart(days, chartParams.startStat, chartParams.happyJumpParams, chartParams.xanaxParams);
+        });
+
+        daySlider.addEventListener('input', (e) => {
+            const days = parseInt(e.target.value);
+            daySliderValue.textContent = days;
+            // Only update chart if a calculation has already been run
+            if (projectionChart && chartParams.startStat !== undefined) {
+                updateChart(days, chartParams.startStat, chartParams.happyJumpParams, chartParams.xanaxParams);
+            }
+        });
+
+        // Initial setup
+        window.onload = () => {
+            populateSelects();
+        };
+
+    </script>
+</body>
+</html>
