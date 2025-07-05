@@ -223,7 +223,6 @@
             const num_trains = Math.floor(total_energy_to_spend / energy_per_train);
             if (num_trains <= 0) return { error: "Not enough energy for a single train." };
 
-            // *** BUG FIX: Encapsulate parameters to avoid scope issues in nested functions ***
             const params = {
                 gym_dots, energy_per_train, statMultiplier,
                 stat_val1, stat_val2, stat_val3
