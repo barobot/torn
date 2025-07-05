@@ -223,32 +223,38 @@
             const num_trains = Math.floor(total_energy_to_spend / energy_per_train);
             if (num_trains <= 0) return { error: "Not enough energy for a single train." };
 
-            const calculate_lowest_gain = (base_stat, happy) => {
-                const happy_factor = Math.round((1 + 0.07 * Math.round(Math.log(1 + happy / 250) * 10000) / 10000) * 10000) / 10000;
-                const term1 = base_stat * happy_factor;
-                const term2 = 8 * Math.pow(happy, 1.05);
-                const term3 = stat_val1 * (1 - Math.pow(happy / 99999, 2));
-                const term4 = stat_val2;
-                const inner_sum = term1 + term2 + term3 + term4 - stat_val3;
-                const constant = 1 / 200000;
-                return constant * gym_dots * energy_per_train * statMultiplier * inner_sum;
+            // *** BUG FIX: Encapsulate parameters to avoid scope issues in nested functions ***
+            const params = {
+                gym_dots, energy_per_train, statMultiplier,
+                stat_val1, stat_val2, stat_val3
             };
-            const calculate_highest_gain = (base_stat, happy) => {
+
+            const calculate_lowest_gain = (base_stat, happy, p) => {
                 const happy_factor = Math.round((1 + 0.07 * Math.round(Math.log(1 + happy / 250) * 10000) / 10000) * 10000) / 10000;
                 const term1 = base_stat * happy_factor;
                 const term2 = 8 * Math.pow(happy, 1.05);
-                const term3 = stat_val1 * (1 - Math.pow(happy / 99999, 2));
-                const term4 = stat_val2;
-                const inner_sum = term1 + term2 + term3 + term4 + stat_val3;
+                const term3 = p.stat_val1 * (1 - Math.pow(happy / 99999, 2));
+                const term4 = p.stat_val2;
+                const inner_sum = term1 + term2 + term3 + term4 - p.stat_val3;
                 const constant = 1 / 200000;
-                return constant * gym_dots * energy_per_train * statMultiplier * inner_sum;
+                return constant * p.gym_dots * p.energy_per_train * p.statMultiplier * inner_sum;
+            };
+            const calculate_highest_gain = (base_stat, happy, p) => {
+                const happy_factor = Math.round((1 + 0.07 * Math.round(Math.log(1 + happy / 250) * 10000) / 10000) * 10000) / 10000;
+                const term1 = base_stat * happy_factor;
+                const term2 = 8 * Math.pow(happy, 1.05);
+                const term3 = p.stat_val1 * (1 - Math.pow(happy / 99999, 2));
+                const term4 = p.stat_val2;
+                const inner_sum = term1 + term2 + term3 + term4 + p.stat_val3;
+                const constant = 1 / 200000;
+                return constant * p.gym_dots * p.energy_per_train * p.statMultiplier * inner_sum;
             };
 
             let lowest_path_stat = current_stat, highest_path_stat = current_stat;
             let lowest_path_happy = starting_happy, highest_path_happy = starting_happy;
             for (let i = 0; i < num_trains; i++) {
-                const low_gain = calculate_lowest_gain(lowest_path_stat, lowest_path_happy);
-                const high_gain = calculate_highest_gain(highest_path_stat, highest_path_happy);
+                const low_gain = calculate_lowest_gain(lowest_path_stat, lowest_path_happy, params);
+                const high_gain = calculate_highest_gain(highest_path_stat, highest_path_happy, params);
                 lowest_path_stat += low_gain;
                 highest_path_stat += high_gain;
                 lowest_path_happy = Math.max(0, lowest_path_happy - 0.6 * energy_per_train);
@@ -258,8 +264,8 @@
             const o3 = highest_path_stat - current_stat;
             const p3 = (n3 + o3) / 2;
             const c12_error_range = (o3 - n3) / 2;
-            const m3_low_gain = calculate_lowest_gain(current_stat, starting_happy);
-            const m3_high_gain = calculate_highest_gain(current_stat, starting_happy);
+            const m3_low_gain = calculate_lowest_gain(current_stat, starting_happy, params);
+            const m3_high_gain = calculate_highest_gain(current_stat, starting_happy, params);
             const final_result = num_trains > 1 ? p3 : (m3_low_gain + m3_high_gain) / 2;
 
             return {
