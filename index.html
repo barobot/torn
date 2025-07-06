@@ -4,143 +4,217 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Advanced Stat Gain Calculator</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Added chart.js zoom plugin -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* High-Contrast Dark Theme based on user's image */
         body {
             font-family: 'Inter', sans-serif;
+            background-color: #111111;
+            color: #E5E7EB;
+            margin: 0;
+            padding: 1rem;
         }
-        .input-label {
-            @apply block text-sm font-medium text-gray-700 mb-1;
+        .container {
+            max-width: 80rem;
+            margin: auto;
         }
-        .input-field {
-            @apply w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm;
+        .card {
+            background-color: #1F2937;
+            padding: 2rem;
+            border-radius: 1rem;
+            border: 1px solid #374151;
+            margin-bottom: 2rem;
         }
-        .btn {
-            @apply w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white;
+        h1 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            text-align: center;
+            color: #FFFFFF;
+            margin-bottom: 0.5rem;
+        }
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #FFFFFF;
+            border-bottom: 1px solid #4B5563;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .subtitle {
+            text-align: center;
+            color: #9CA3AF;
+            margin-bottom: 2rem;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+        @media (min-width: 1024px) {
+            .grid-container {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        .form-section {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        .input-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem 1.5rem;
+        }
+        @media (min-width: 640px) {
+            .input-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #9CA3AF;
+            margin-bottom: 0.25rem;
+        }
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 0.6rem 0.75rem;
+            background-color: #374151;
+            border: 1px solid #4B5563;
+            border-radius: 0.5rem;
+            color: #FFFFFF;
+            box-sizing: border-box;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        input:focus, select:focus {
+            border-color: #3B82F6;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.4);
+        }
+        button {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            padding: 0.625rem 1rem;
+            border: 1px solid transparent;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #FFFFFF;
+            cursor: pointer;
+            transition: background-color 0.2s;
         }
         .btn-primary {
-            @apply bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500;
+            background-color: #2563EB;
         }
-        .result-card {
-            @apply bg-white p-6 rounded-lg shadow-md mt-6;
+        .btn-primary:hover { background-color: #1D4ED8; }
+        .btn-secondary {
+            background-color: #4B5563;
         }
-        .result-title {
-            @apply text-lg font-semibold text-gray-800 mb-2;
+        .btn-secondary:hover { background-color: #6B7280; }
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            padding-top: 1.5rem;
         }
-        .result-value {
-            @apply text-3xl font-bold text-indigo-600;
+        input[type="checkbox"] {
+            height: 1rem;
+            width: 1rem;
+            border-radius: 0.25rem;
+            border-color: #4B5563;
+            background-color: #374151;
+            color: #2563EB;
+            cursor: pointer;
         }
-        .result-label {
-            @apply text-sm text-gray-500;
+        input[type="checkbox"]:checked {
+             background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
         }
+        .checkbox-container label {
+            margin-left: 0.75rem;
+            margin-bottom: 0;
+            color: #D1D5DB;
+        }
+        #results-container { display: none; }
+        .result-value { font-size: 1.875rem; font-weight: 700; color: #60A5FA; }
+        .result-label { font-size: 0.875rem; color: #9CA3AF; }
+        .warning { padding: 1rem; border-left-width: 4px; margin-top: 0.75rem; border-radius: 0.25rem; }
+        .warning-title { font-weight: 700; }
     </style>
 </head>
-<body class="bg-gray-50">
+<body>
 
-    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
-        <div class="bg-white p-8 rounded-2xl shadow-lg">
-            <h1 class="text-3xl font-bold text-gray-900 text-center mb-2">Advanced Stat Gain Calculator</h1>
-            <p class="text-center text-gray-600 mb-8">Model your training sessions and project long-term gains.</p>
+    <div class="container">
+        <div class="card">
+            <h1>Advanced Stat Gain Calculator</h1>
+            <p class="subtitle">Model your training sessions and project long-term gains.</p>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <!-- Input Form -->
-                <div class="space-y-6">
+            <div class="card" style="background-color: #111827; margin-bottom: 2rem;">
+                 <h2 style="text-align: center; border: none; margin-bottom: 1rem;">Torn API Integration</h2>
+                 <!-- *** LAYOUT CORRECTED for API section *** -->
+                 <div style="display: flex; gap: 1rem; align-items: flex-end;">
+                    <div style="flex-grow: 1;">
+                        <label for="apiKey">Your API Key</label>
+                        <input type="text" id="apiKey" placeholder="Enter your Torn API key">
+                    </div>
+                    <div style="flex-shrink: 0;">
+                        <button id="fetchStatsBtn" class="btn-secondary">Fetch My Stats</button>
+                    </div>
+                 </div>
+                 <div id="apiStatus" style="text-align: center; margin-top: 0.75rem; height: 1.25rem;"></div>
+            </div>
+
+            <div class="grid-container">
+                <div class="form-section">
                     <div>
-                        <h2 class="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">Training Setup</h2>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label for="gym" class="input-label">Gym</label>
-                                <select id="gym" class="input-field"></select>
-                            </div>
-                            <div>
-                                <label for="stat" class="input-label">Stat to Train</label>
-                                <select id="stat" class="input-field"></select>
-                            </div>
-                            <div>
-                                <label for="currentStat" class="input-label">Current Stat</label>
-                                <input type="number" id="currentStat" class="input-field" value="1000">
-                            </div>
-                             <div>
-                                <label for="statMultiplier" class="input-label">Stat Multiplier</label>
-                                <input type="number" id="statMultiplier" class="input-field" value="1.0" step="0.01">
-                            </div>
-                            <div>
-                                <label for="energy" class="input-label">Energy to Train</label>
-                                <input type="number" id="energy" class="input-field" value="1000">
-                            </div>
-                            <div>
-                                <label for="initialHappy" class="input-label">Initial Happy</label>
-                                <input type="number" id="initialHappy" class="input-field" value="5025">
-                            </div>
+                        <h2>Training Setup</h2>
+                        <div class="input-grid">
+                            <div><label for="gym">Gym</label><select id="gym"></select></div>
+                            <div><label for="stat">Stat to Train</label><select id="stat"></select></div>
+                            <div><label for="currentStat">Current Stat</label><input type="number" id="currentStat" value="1000"></div>
+                            <div><label for="statMultiplier">Stat Multiplier</label><input type="number" id="statMultiplier" value="1.0" step="0.01"></div>
+                            <div><label for="energy">Energy to Train</label><input type="number" id="energy" value="1000"></div>
+                            <div><label for="initialHappy">Initial Happy</label><input type="number" id="initialHappy" value="5025"></div>
                         </div>
                     </div>
                     <div>
-                        <h2 class="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">Item Usage</h2>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                             <div>
-                                <label for="candyType" class="input-label">Candy Type</label>
-                                <select id="candyType" class="input-field"></select>
-                            </div>
-                            <div>
-                                <label for="candyAmount" class="input-label">Candies Used</label>
-                                <input type="number" id="candyAmount" class="input-field" value="4">
-                            </div>
-                            <div>
-                                <label for="edvdAmount" class="input-label">eDVDs Used</label>
-                                <input type="number" id="edvdAmount" class="input-field" value="2">
-                            </div>
-                            <div class="flex items-end">
-                                <div class="relative flex items-start">
-                                    <div class="flex items-center h-5">
-                                        <input id="useEcstasy" type="checkbox" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded" checked>
-                                    </div>
-                                    <div class="ml-3 text-sm">
-                                        <label for="useEcstasy" class="font-medium text-gray-700">Use Ecstasy?</label>
-                                    </div>
-                                </div>
+                        <h2>Item Usage</h2>
+                        <div class="input-grid">
+                            <div><label for="candyType">Candy Type</label><select id="candyType"></select></div>
+                            <div><label for="candyAmount">Candies Used</label><input type="number" id="candyAmount" value="4"></div>
+                            <div><label for="edvdAmount">eDVDs Used</label><input type="number" id="edvdAmount" value="2"></div>
+                            <div class="checkbox-container">
+                                <input id="useEcstasy" type="checkbox" checked>
+                                <label for="useEcstasy">Use Ecstasy?</label>
                             </div>
                         </div>
                     </div>
-                     <button id="calculateBtn" class="btn btn-primary !mt-8">Calculate & Project</button>
                 </div>
 
-                <!-- Results Display -->
-                <div id="results-container" class="hidden">
-                    <div class="result-card">
-                         <h2 class="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">Calculation Results</h2>
-                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
-                            <div>
-                                <p class="result-value" id="statGain"></p>
-                                <p class="result-label">Expected Gain</p>
-                            </div>
-                            <div>
-                                <p class="result-value" id="finalStat"></p>
-                                <p class="result-label">Predicted Final Stat</p>
-                            </div>
-                             <div>
-                                <p class="result-value" id="errorRange"></p>
-                                <p class="result-label">Possible Error (±)</p>
-                            </div>
+                <div id="results-container">
+                     <div class="result-card" style="height: 100%; display: flex; flex-direction: column; justify-content: center;">
+                         <h2 style="text-align: center;">Calculation Results</h2>
+                         <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem; text-align: center; padding: 1rem 0;">
+                            <div><p class="result-value" id="statGain"></p><p class="result-label">Expected Gain</p></div>
+                            <div><p class="result-value" id="finalStat"></p><p class="result-label">Predicted Final Stat</p></div>
+                            <div><p class="result-value" id="errorRange"></p><p class="result-label">Possible Error (±)</p></div>
                          </div>
                     </div>
-                    <div id="warnings-container" class="mt-4 space-y-2"></div>
                 </div>
             </div>
+             <button id="calculateBtn" class="btn-primary" style="margin-top: 2rem; max-width: 24rem; margin-left: auto; margin-right: auto;">Calculate & Project</button>
+             <div id="warnings-container" style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem;"></div>
         </div>
 
-        <!-- Chart -->
-        <div class="bg-white p-8 rounded-2xl shadow-lg mt-8 hidden" id="chart-container">
-            <h2 class="text-2xl font-bold text-gray-900 text-center mb-4">Stat Gain Projection</h2>
-            <!-- Day Range Slider -->
-            <div class="mb-4 max-w-lg mx-auto">
-                <label for="daySlider" class="input-label text-center">Projection Period: <span id="daySliderValue" class="font-bold">90</span> days</label>
-                <input type="range" id="daySlider" min="10" max="365" value="90" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+        <div class="card" id="chart-container" style="display: none;">
+            <h2>Stat Gain Projection</h2>
+            <div>
+                <label for="daySlider" style="text-align: center;">Projection Period: <span id="daySliderValue" style="font-weight: 700; color: #60A5FA;">90</span> days</label>
+                <input type="range" id="daySlider" min="10" max="365" value="90" style="width: 100%;">
             </div>
             <canvas id="projectionChart"></canvas>
         </div>
@@ -166,6 +240,16 @@
             "Total Rebound": [50, -1, 8.0, -1, -1], "Elites": [50, -1, -1, -1, 8.0],
             "Sports Science Lab": [25, 9.0, 9.0, 9.0, 9.0], "The Jail Gym": [5, 3.4, 3.4, 4.6, -1],
         };
+        const GYM_ID_MAP = {
+            1: "Premier Fitness", 2: "Average Joes", 3: "Woody's Workout", 4: "Beach Bods",
+            5: "Silver Gym", 6: "Pour Femme", 7: "Davies Den", 8: "Global Gym",
+            9: "Knuckle Heads", 10: "Pioneer Fitness", 11: "Anabolic Anomalie", 12: "Core",
+            13: "Racing Fitness", 14: "Complete Cardio", 15: "Legs, Bums and Tums", 16: "Deep Burn",
+            17: "Apollo Gym", 18: "Gun Shop", 19: "Force Training", 20: "Cha Cha's",
+            21: "Atlas", 22: "Last Round", 23: "The Edge", 24: "George's",
+            25: "Balboas Gym", 26: "Frontline Fitness", 27: "Gym 3000", 28: "Mr. Isoyamas",
+            29: "Total Rebound", 30: "Elites", 31: "Sports Science Lab", 32: "The Jail Gym",
+        };
         const STAT_TABLE = {
             "strength": [1600, 1700, 700], "speed": [1600, 2000, 1350],
             "dexterity": [1800, 1500, 1000], "defense": [2100, -600, 1500],
@@ -181,7 +265,9 @@
         const NATURAL_ENERGY_REGEN_PERIOD_MINUTES = 10;
         const NATURAL_ENERGY_REGEN_AMOUNT = 5;
 
-        // --- Core Calculation Logic ---
+        let fetchedStats = null;
+        let fetchedPerks = null;
+
         function calculate_final_stat(total_energy_to_spend, gym_name, stat_to_train, current_stat, initial_happy, statMultiplier, candies_used = null, edvds_used = 0, use_ecstasy = false) {
             if (candies_used === null) candies_used = {};
             let total_happy_gain = 0, total_happy_cooldown = 0;
@@ -223,7 +309,6 @@
             const num_trains = Math.floor(total_energy_to_spend / energy_per_train);
             if (num_trains <= 0) return { error: "Not enough energy for a single train." };
 
-            // *** BUG FIX: Encapsulate parameters to avoid scope issues in nested functions ***
             const params = {
                 gym_dots, energy_per_train, statMultiplier,
                 stat_val1, stat_val2, stat_val3
@@ -279,15 +364,22 @@
             };
         }
 
-        // --- UI and Chart Logic ---
         const gymSelect = document.getElementById('gym');
         const statSelect = document.getElementById('stat');
         const candySelect = document.getElementById('candyType');
         const calculateBtn = document.getElementById('calculateBtn');
         const daySlider = document.getElementById('daySlider');
         const daySliderValue = document.getElementById('daySliderValue');
+        const fetchStatsBtn = document.getElementById('fetchStatsBtn');
+        const apiKeyInput = document.getElementById('apiKey');
+        const apiStatus = document.getElementById('apiStatus');
+        const currentStatInput = document.getElementById('currentStat');
+        const statMultiplierInput = document.getElementById('statMultiplier');
+        const energyInput = document.getElementById('energy');
+        const happyInput = document.getElementById('initialHappy');
+        
         let projectionChart = null;
-        let chartParams = {}; // Store params for slider updates
+        let chartParams = {};
 
         function populateSelects() {
             Object.keys(GYM_TABLE).forEach(gym => {
@@ -313,26 +405,32 @@
             });
             candySelect.value = "Candy (+100)";
         }
+        
+        function getMultiplierForStat(statName) {
+            if (!fetchedPerks) return 1.0;
+            const selectedStat = statName.toLowerCase();
+            let totalBonus = 0;
+            const allPerks = [...(fetchedPerks.faction_perks || []), ...(fetchedPerks.property_perks || [])];
+            allPerks.forEach(perk => {
+                const statSpecificRegex = new RegExp(`\\+ (\\d+)% ${selectedStat} gym gains`);
+                const genericRegex = new RegExp(`\\+ (\\d+)% gym gains`);
+                let match = perk.match(statSpecificRegex) || perk.match(genericRegex);
+                if (match) totalBonus += parseInt(match[1]);
+            });
+            return 1 + (totalBonus / 100);
+        }
+
+        function updateStatMultiplier() {
+            statMultiplierInput.value = getMultiplierForStat(statSelect.value).toFixed(2);
+        }
 
         function projectGains(days, startStat, strategyParams) {
             let dailyStats = [startStat];
             let currentStat = startStat;
             for (let i = 0; i < days; i++) {
-                const result = calculate_final_stat(
-                    strategyParams.energy,
-                    strategyParams.gym,
-                    strategyParams.stat,
-                    currentStat,
-                    strategyParams.happy,
-                    strategyParams.multiplier,
-                    strategyParams.candies,
-                    strategyParams.edvds,
-                    strategyParams.ecstasy
-                );
-                if (result.error) {
-                    console.error("Projection error:", result.error);
-                    break;
-                }
+                const projectionMultiplier = getMultiplierForStat(strategyParams.stat);
+                const result = calculate_final_stat(strategyParams.energy, strategyParams.gym, strategyParams.stat, currentStat, strategyParams.happy, projectionMultiplier, strategyParams.candies, strategyParams.edvds, strategyParams.ecstasy);
+                if (result.error) { console.error("Projection error:", result.error); break; }
                 currentStat = result.final_lowest_stat;
                 dailyStats.push(currentStat);
             }
@@ -341,168 +439,104 @@
 
         function updateChart(days, startStat, happyJumpParams, xanaxParams) {
             const chartContainer = document.getElementById('chart-container');
-            chartContainer.classList.remove('hidden');
             const ctx = document.getElementById('projectionChart').getContext('2d');
-            
             const labels = Array.from({ length: days + 1 }, (_, i) => `Day ${i}`);
-            
             const happyJumpData = projectGains(days, startStat, happyJumpParams);
             const xanaxData = projectGains(days, startStat, xanaxParams);
-
-            if (projectionChart) {
-                projectionChart.destroy();
-            }
-
+            if (projectionChart) projectionChart.destroy();
             projectionChart = new Chart(ctx, {
                 type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: 'Happy Jump Strategy',
-                            data: happyJumpData,
-                            borderColor: 'rgb(79, 70, 229)',
-                            backgroundColor: 'rgba(79, 70, 229, 0.1)',
-                            tension: 0.1,
-                            fill: true,
-                        },
-                        {
-                            label: 'Xanax Train Strategy',
-                            data: xanaxData,
-                            borderColor: 'rgb(220, 38, 38)',
-                            backgroundColor: 'rgba(220, 38, 38, 0.1)',
-                            tension: 0.1,
-                            fill: true,
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { position: 'top' },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    if (context.parsed.y !== null) {
-                                        label += context.parsed.y.toLocaleString(undefined, {maximumFractionDigits: 0});
-                                    }
-                                    return label;
-                                }
-                            }
-                        },
-                        // Zoom plugin configuration
-                        zoom: {
-                            pan: {
-                                enabled: true,
-                                mode: 'xy',
-                            },
-                            zoom: {
-                                wheel: {
-                                    enabled: true,
-                                },
-                                pinch: {
-                                    enabled: true
-                                },
-                                mode: 'xy',
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            title: { display: true, text: 'Total Stat' },
-                            ticks: {
-                                callback: function(value) {
-                                    return value.toLocaleString();
-                                }
-                            }
-                        }
-                    }
-                }
+                data: { labels, datasets: [{ label: 'Happy Jump Strategy', data: happyJumpData, borderColor: 'rgb(59, 130, 246)', backgroundColor: 'rgba(59, 130, 246, 0.1)', tension: 0.1, fill: true }, { label: 'Xanax Train Strategy', data: xanaxData, borderColor: 'rgb(220, 38, 38)', backgroundColor: 'rgba(220, 38, 38, 0.1)', tension: 0.1, fill: true }] },
+                options: { responsive: true, plugins: { legend: { position: 'top', labels: { color: '#e5e7eb'} }, tooltip: { callbacks: { label: (c) => `${c.dataset.label || ''}: ${c.parsed.y.toLocaleString(undefined, {maximumFractionDigits: 0})}` } }, zoom: { pan: { enabled: true, mode: 'xy' }, zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'xy' } } }, scales: { x: { ticks: { color: '#9ca3af' }, grid: { color: 'rgba(255, 255, 255, 0.1)'} }, y: { title: { display: true, text: 'Total Stat', color: '#e5e7eb' }, ticks: { callback: (v) => v.toLocaleString(), color: '#9ca3af' }, grid: { color: 'rgba(255, 255, 255, 0.1)'} } } }
             });
         }
 
         calculateBtn.addEventListener('click', () => {
-            // Get all inputs
-            const gym = gymSelect.value;
-            const stat = statSelect.value;
-            const currentStat = parseFloat(document.getElementById('currentStat').value);
-            const statMultiplier = parseFloat(document.getElementById('statMultiplier').value);
-            const energy = parseFloat(document.getElementById('energy').value);
-            const initialHappy = parseFloat(document.getElementById('initialHappy').value);
-            const candyType = candySelect.value;
-            const candyAmount = parseInt(document.getElementById('candyAmount').value);
-            const edvdAmount = parseInt(document.getElementById('edvdAmount').value);
-            const useEcstasy = document.getElementById('useEcstasy').checked;
-
+            const gym = gymSelect.value, stat = statSelect.value, currentStat = parseFloat(currentStatInput.value), statMultiplier = parseFloat(statMultiplierInput.value), energy = parseFloat(energyInput.value), initialHappy = parseFloat(happyInput.value), candyType = candySelect.value, candyAmount = parseInt(document.getElementById('candyAmount').value), edvdAmount = parseInt(document.getElementById('edvdAmount').value), useEcstasy = document.getElementById('useEcstasy').checked;
             const candies_used = {};
-            if (candyAmount > 0) {
-                candies_used[candyType] = candyAmount;
-            }
-
-            // Run main calculation
+            if (candyAmount > 0) candies_used[candyType] = candyAmount;
             const result = calculate_final_stat(energy, gym, stat, currentStat, initialHappy, statMultiplier, candies_used, edvdAmount, useEcstasy);
-            
-            // Display results
-            const resultsContainer = document.getElementById('results-container');
-            const warningsContainer = document.getElementById('warnings-container');
-            resultsContainer.classList.remove('hidden');
+            const resultsContainer = document.getElementById('results-container'), warningsContainer = document.getElementById('warnings-container');
+            resultsContainer.style.display = 'block';
             warningsContainer.innerHTML = '';
-
             if (result.error) {
-                document.getElementById('statGain').textContent = 'Error';
-                document.getElementById('finalStat').textContent = 'Error';
-                document.getElementById('errorRange').textContent = 'N/A';
-                warningsContainer.innerHTML = `<div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert"><p class="font-bold">Error</p><p>${result.error}</p></div>`;
-                return;
+                document.getElementById('statGain').textContent = 'Error'; document.getElementById('finalStat').textContent = 'Error'; document.getElementById('errorRange').textContent = 'N/A';
+                warningsContainer.innerHTML = `<div><p>Error</p><p>${result.error}</p></div>`; return;
             }
-
-            const gain = result.final_expected_gain_b12;
-            const finalStat = currentStat + gain;
-
+            const gain = result.final_expected_gain_b12, finalStat = currentStat + gain;
             document.getElementById('statGain').textContent = gain.toLocaleString(undefined, {maximumFractionDigits: 2});
             document.getElementById('finalStat').textContent = finalStat.toLocaleString(undefined, {maximumFractionDigits: 2});
             document.getElementById('errorRange').textContent = `± ${result.possible_error_c12.toLocaleString(undefined, {maximumFractionDigits: 2})}`;
-            
-            if(result.cooldown_warning) {
-                warningsContainer.innerHTML += `<div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4" role="alert"><p class="font-bold">Cooldown Warning</p><p>${result.cooldown_warning}</p></div>`;
+            if(result.cooldown_warning) warningsContainer.innerHTML += `<div><p>Cooldown Warning</p><p>${result.cooldown_warning}</p></div>`;
+            if(result.strategy_warning) warningsContainer.innerHTML += `<div><p>Strategy Note</p><p>${result.strategy_warning}</p></div>`;
+            let bestGain = -Infinity, bestStat = '';
+            for (const otherStat of Object.keys(STAT_TABLE)) {
+                if (otherStat === stat) continue;
+                const otherCurrentStat = currentStat, otherStatMultiplier = getMultiplierForStat(otherStat);
+                const otherResult = calculate_final_stat(energy, gym, otherStat, otherCurrentStat, initialHappy, otherStatMultiplier, candies_used, edvdAmount, useEcstasy);
+                if (!otherResult.error && otherResult.final_expected_gain_b12 > bestGain) { bestGain = otherResult.final_expected_gain_b12; bestStat = otherStat; }
             }
-            if(result.strategy_warning) {
-                warningsContainer.innerHTML += `<div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4" role="alert"><p class="font-bold">Strategy Note</p><p>${result.strategy_warning}</p></div>`;
-            }
-
-            // --- Store params and Update Chart ---
-            chartParams.startStat = currentStat;
-            chartParams.happyJumpParams = {
-                energy: energy, gym: gym, stat: stat, happy: initialHappy,
-                multiplier: statMultiplier, candies: candies_used, edvds: edvdAmount, ecstasy: useEcstasy
-            };
-            chartParams.xanaxParams = {
-                energy: 1840, gym: gym, stat: stat, happy: initialHappy,
-                multiplier: statMultiplier, candies: {}, edvds: 0, ecstasy: false
-            };
+            if (bestGain > gain) warningsContainer.innerHTML += `<div><p>Optimal Stat Warning</p><p>You could gain more by training <strong>${bestStat.charAt(0).toUpperCase() + bestStat.slice(1)}</strong> in this gym. (Expected Gain: ~${bestGain.toLocaleString(undefined, {maximumFractionDigits: 2})})</p></div>`;
             
-            const days = parseInt(daySlider.value);
-            updateChart(days, chartParams.startStat, chartParams.happyJumpParams, chartParams.xanaxParams);
+            const chartContainer = document.getElementById('chart-container');
+            if (energy === 1000) {
+                chartContainer.style.display = 'block';
+                chartParams = { startStat: currentStat, happyJumpParams: { energy, gym, stat, happy: initialHappy, multiplier: statMultiplier, candies: candies_used, edvds: edvdAmount, ecstasy: useEcstasy }, xanaxParams: { energy: 1840, gym, stat, happy: initialHappy, multiplier: getMultiplierForStat(stat), candies: {}, edvds: 0, ecstasy: false } };
+                updateChart(parseInt(daySlider.value), chartParams.startStat, chartParams.happyJumpParams, chartParams.xanaxParams);
+            } else {
+                chartContainer.style.display = 'none';
+                if(projectionChart) {
+                    projectionChart.destroy();
+                    projectionChart = null;
+                }
+            }
         });
 
         daySlider.addEventListener('input', (e) => {
             const days = parseInt(e.target.value);
             daySliderValue.textContent = days;
-            // Only update chart if a calculation has already been run
-            if (projectionChart && chartParams.startStat !== undefined) {
-                updateChart(days, chartParams.startStat, chartParams.happyJumpParams, chartParams.xanaxParams);
-            }
+            if (projectionChart && chartParams.startStat !== undefined) updateChart(days, chartParams.startStat, chartParams.happyJumpParams, chartParams.xanaxParams);
         });
 
-        // Initial setup
-        window.onload = () => {
-            populateSelects();
-        };
+        fetchStatsBtn.addEventListener('click', async () => {
+            const apiKey = apiKeyInput.value;
+            if (!apiKey) { apiStatus.textContent = "Please enter an API key."; return; }
+            apiStatus.textContent = "Fetching...";
+            try {
+                const response = await fetch(`https://api.torn.com/user/?selections=battlestats,gym,perks,bars&key=${apiKey}&comment=StatCalculator`);
+                const data = await response.json();
+                if (data.error) throw new Error(`API Error: ${data.error.error}`);
+                fetchedStats = data; fetchedPerks = data;
+                localStorage.setItem('tornApiKey', apiKey);
+                apiStatus.textContent = "All data fetched successfully!";
+                const selectedStat = statSelect.value.toLowerCase();
+                if (fetchedStats && fetchedStats[selectedStat] !== undefined) currentStatInput.value = fetchedStats[selectedStat];
+                const activeGymId = data.active_gym;
+                const activeGymName = GYM_ID_MAP[activeGymId];
+                if (activeGymName) gymSelect.value = activeGymName;
+                if (data.energy && data.energy.current !== undefined) energyInput.value = data.energy.current;
+                if (data.happy && data.happy.current !== undefined) happyInput.value = data.happy.current;
+                updateStatMultiplier();
+            } catch (error) {
+                apiStatus.textContent = error.message;
+                fetchedStats = null; fetchedPerks = null;
+            }
+        });
+        
+        statSelect.addEventListener('change', () => {
+            if (fetchedStats) {
+                const selectedStat = statSelect.value.toLowerCase();
+                if (fetchedStats[selectedStat] !== undefined) currentStatInput.value = fetchedStats[selectedStat];
+            }
+            updateStatMultiplier();
+        });
 
+        window.onload = () => {
+            if (window.ChartZoom) Chart.register(window.ChartZoom);
+            populateSelects();
+            const savedApiKey = localStorage.getItem('tornApiKey');
+            if (savedApiKey) apiKeyInput.value = savedApiKey;
+        };
     </script>
 </body>
 </html>
